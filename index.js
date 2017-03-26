@@ -148,7 +148,7 @@ AFRAME.registerComponent('slice9', {
      if (diff.width || diff.height || diff.padding || diff.left || diff.top || diff.bottom || diff.right) {
        this.regenerate();
      }
-   }
+   },
 
   /**
    * Called when a component is removed (e.g., via removeAttribute).
