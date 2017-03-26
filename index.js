@@ -16,10 +16,10 @@ AFRAME.registerComponent('slice9', {
     bottom: {default: 0, min: 0},
     top: {default: 0, min: 0},
     side: {default: 'front', oneOf: ['front', 'back', 'double']},
+    padding: {default: 0.1, min: 0.01},
     color: {type: 'color', default: '#fff'},
     opacity: {default: 1.0, min: 0, max: 1},
     transparent: {default: true},
-    padding: {default: 0.1, min: 0.01},
     debug: {default: false}
   },
 

@@ -8,7 +8,19 @@ For [A-Frame](https://aframe.io).
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-|          |             |               |
+| width       |             | 1              |
+| height      |             | 1              |
+| left        |             | 0              |
+| right       |             | 0              |
+| bottom      |             | 0              |
+| top         |             | 0              |
+| side        |             | front              |
+| padding     |             | 0.1              |
+| color       |             | #fff              |
+| opacity     |             | 1.0              |
+| transparent |             | true              |
+| debug       |             | false              |
+| map         |             | ''              |
 
 ### Installation
 
