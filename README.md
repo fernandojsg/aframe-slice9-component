@@ -2,6 +2,8 @@
 
 A Slice9 component for A-Frame.
 
+![slice9](https://raw.githubusercontent.com/fernandojsg/aframe-slice9-component/master/images/screenshotbasic.png)
+
 For [A-Frame](https://aframe.io).
 
 ### API
