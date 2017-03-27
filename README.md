@@ -1,8 +1,8 @@
 ## aframe-slice9-component
 
-A Slice9 component for A-Frame.
+A  [9-Slice](http://www.centigrade.de/blog/en/article/modern-user-interface-design-tools-part-2-graphical-approach-of-gui-design-tools/) component for [A-Frame](https://aframe.io).
 
-For [A-Frame](https://aframe.io).
+ ![slice9](https://raw.githubusercontent.com/fernandojsg/aframe-slice9-component/master/images/screenshotbasic.png)
 
 ### API
 
