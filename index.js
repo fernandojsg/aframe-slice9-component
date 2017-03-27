@@ -20,7 +20,8 @@ AFRAME.registerComponent('slice9', {
     color: {type: 'color', default: '#fff'},
     opacity: {default: 1.0, min: 0, max: 1},
     transparent: {default: true},
-    debug: {default: false}
+    debug: {default: false},
+    src: {type: 'map'}
   },
 
   /**
@@ -37,16 +38,35 @@ AFRAME.registerComponent('slice9', {
     var geometry = this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
 
     var textureLoader = new THREE.TextureLoader();
-    var self = this;
-    material.map = textureLoader.load('tooltip.png', function() {
-      self.regenerate();
-    });
-
     this.plane = new THREE.Mesh(geometry, material);
     this.el.setObject3D('line', this.plane);
+    this.textureSrc = null;
   },
 
-  regenerate: function () {
+  updateMap: function () {
+    var src = this.data.src;
+
+    if (src) {
+      if (src === this.textureSrc) { return; }
+      // Texture added or changed.
+      this.textureSrc = src;
+      this.el.sceneEl.systems.material.loadTexture(src, {src: src}, setMap.bind(this));
+      return;
+    }
+
+    // Texture removed.
+    if (!this.material.map) { return; }
+    setMap(null);
+
+
+    function setMap (texture) {
+      this.material.map = texture;
+      this.material.needsUpdate = true;
+      this.regenerateMesh();
+    }
+  },
+
+  regenerateMesh: function () {
     var data = this.data;
     var pos = this.geometry.attributes.position.array;
     var uvs = this.geometry.attributes.uv.array;
@@ -145,8 +165,11 @@ AFRAME.registerComponent('slice9', {
      this.material.side = parseSide(data.side);
 
      var diff = AFRAME.utils.diff(data, oldData);
-     if (diff.width || diff.height || diff.padding || diff.left || diff.top || diff.bottom || diff.right) {
-       this.regenerate();
+     if ('src' in diff) {
+       this.updateMap();
+     }
+     else if ('width' in diff || 'height' in diff || 'padding' in diff || 'left' in diff || 'top' in diff || 'bottom' in diff || 'right' in diff) {
+       this.regenerateMesh();
      }
    },
 
