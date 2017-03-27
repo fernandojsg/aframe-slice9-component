@@ -85,7 +85,7 @@
 
 	    var textureLoader = new THREE.TextureLoader();
 	    this.plane = new THREE.Mesh(geometry, material);
-	    this.el.setObject3D('line', this.plane);
+	    this.el.setObject3D('mesh', this.plane);
 	    this.textureSrc = null;
 	  },
 
