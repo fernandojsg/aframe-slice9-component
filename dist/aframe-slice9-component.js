@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* global AFRAME */
 
@@ -55,70 +55,54 @@
 	 */
 	AFRAME.registerComponent('slice9', {
 	  schema: {
-	    width: {default: 1, min: 0},
+	    bottom: {default: 0, min: 0},
+	    color: {type: 'color', default: '#fff'},
+	    debug: {default: false},
 	    height: {default: 1, min: 0},
 	    left: {default: 0, min: 0},
-	    right: {default: 0, min: 0},
-	    bottom: {default: 0, min: 0},
-	    top: {default: 0, min: 0},
-	    side: {default: 'front', oneOf: ['front', 'back', 'double']},
-	    padding: {default: 0.1, min: 0.01},
-	    color: {type: 'color', default: '#fff'},
 	    opacity: {default: 1.0, min: 0, max: 1},
+	    padding: {default: 0.1, min: 0.01},
+	    right: {default: 0, min: 0},
+	    side: {default: 'front', oneOf: ['front', 'back', 'double']},
+	    src: {type: 'map'},
+	    top: {default: 0, min: 0},
 	    transparent: {default: true},
-	    debug: {default: false},
-	    src: {type: 'map'}
+	    width: {default: 1, min: 0},
+	    usingCustomMaterial: {default: false},
+	    usingAtlas: {default: false},
+	    uvAtlasMin: {type: 'vec2'},
+	    uvAtlasMax: {type: 'vec2'}
 	  },
 
-	  /**
-	   * Set if component needs multiple instancing.
-	   */
-	  multiple: false,
-
-	  /**
-	   * Called once when component is attached. Generally for initial setup.
-	   */
 	  init: function () {
 	    var data = this.data;
-	    var material = this.material = new THREE.MeshBasicMaterial({color: data.color, opacity: data.opacity, transparent: data.transparent, wireframe: data.debug});
-	    var geometry = this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
+	    var geometry;
+	    var material;
 
-	    var textureLoader = new THREE.TextureLoader();
-	    this.plane = new THREE.Mesh(geometry, material);
-	    this.el.setObject3D('mesh', this.plane);
 	    this.textureSrc = null;
-	  },
 
-	  updateMap: function () {
-	    var src = this.data.src;
+	    geometry = this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
 
-	    if (src) {
-	      if (src === this.textureSrc) { return; }
-	      // Texture added or changed.
-	      this.textureSrc = src;
-	      this.el.sceneEl.systems.material.loadTexture(src, {src: src}, setMap.bind(this));
-	      return;
+	    // Create mesh.
+	    if (data.usingCustomMaterial) {
+	      this.plane = new THREE.Mesh(geometry);
+	    } else {
+	      material = this.material = new THREE.MeshBasicMaterial({
+	        color: data.color, opacity: data.opacity, transparent: data.transparent,
+	        wireframe: data.debug
+	      });
+	      this.plane = new THREE.Mesh(geometry, material);
 	    }
-
-	    // Texture removed.
-	    if (!this.material.map) { return; }
-	    setMap(null);
-
-
-	    function setMap (texture) {
-	      this.material.map = texture;
-	      this.material.needsUpdate = true;
-	      this.regenerateMesh();
-	    }
+	    this.el.setObject3D('mesh', this.plane);
 	  },
 
 	  regenerateMesh: function () {
 	    var data = this.data;
+	    var height;
 	    var pos = this.geometry.attributes.position.array;
+	    var uv;
 	    var uvs = this.geometry.attributes.uv.array;
-	    var image = this.material.map.image;
-
-	    if (!image) {return;}
+	    var width;
 
 	    /*
 	      0--1------------------------------2--3
@@ -136,17 +120,28 @@
 	      pos[3 * id + 1] = y;
 	    }
 
-	    function setUV(id, u, v) {
+	    function setUV (id, u, v) {
+	      if (data.usingAtlas) {
+	        u = data.uvAtlasMin.x + (u * (data.uvAtlasMax.x - data.uvAtlasMin.x));
+	        v = data.uvAtlasMin.y + (v * (data.uvAtlasMax.y - data.uvAtlasMin.y));
+	      }
 	      uvs[2 * id] = u;
 	      uvs[2 * id + 1] = v;
 	    }
 
 	    // Update UVS
-	    var uv = {
-	      left: data.left / image.width,
-	      right: data.right / image.width,
-	      top: data.top / image.height,
-	      bottom: data.bottom / image.height
+	    if (data.usingCustomMaterial) {
+	      height = 1;
+	      width = 1;
+	    } else {
+	      height = this.material.map.image.width;
+	      width = this.material.map.image.width;
+	    }
+	    uv = {
+	      left: data.left / width,
+	      right: data.right / width,
+	      top: data.top / height,
+	      bottom: data.bottom / height
 	    };
 
 	    setUV(1,  uv.left,  1);
@@ -164,6 +159,13 @@
 
 	    setUV(13, uv.left,  0);
 	    setUV(14, uv.right, 0);
+
+	    if (data.usingAtlas) {
+	      setUV(0, 0, 1);
+	      setUV(3, 1, 1);
+	      setUV(12, 0, 0);
+	      setUV(15, 1, 0);
+	    }
 
 	    // Update vertex positions
 	    var w2 = data.width / 2;
@@ -197,50 +199,53 @@
 	    this.geometry.attributes.uv.needsUpdate = true;
 	  },
 
-	  /**
-	   * Called when component is attached and when component data changes.
-	   * Generally modifies the entity based on the data.
-	   */
-	   update: function (oldData) {
-	     var data = this.data;
+	  update: function (oldData) {
+	    var data = this.data;
+	    var diff;
 
-	     this.material.color.setStyle(data.color);
-	     this.material.opacity = data.opacity;
-	     this.material.transparent = data.transparent;
-	     this.material.wireframe = data.debug;
-	     this.material.side = parseSide(data.side);
+	    diff = AFRAME.utils.diff(data, oldData);
 
-	     var diff = AFRAME.utils.diff(data, oldData);
-	     if ('src' in diff) {
-	       this.updateMap();
-	     }
-	     else if ('width' in diff || 'height' in diff || 'padding' in diff || 'left' in diff || 'top' in diff || 'bottom' in diff || 'right' in diff) {
-	       this.regenerateMesh();
-	     }
-	   },
+	    // Update material if using built-in material.
+	    if (!data.usingCustomMaterial) {
+	      this.material.color.setStyle(data.color);
+	      this.material.opacity = data.opacity;
+	      this.material.transparent = data.transparent;
+	      this.material.wireframe = data.debug;
+	      this.material.side = parseSide(data.side);
+	      if ('src' in diff) { this.updateMap(); }
+	    }
 
-	  /**
-	   * Called when a component is removed (e.g., via removeAttribute).
-	   * Generally undoes all modifications to the entity.
-	   */
-	  remove: function () { },
+	    if ('width' in diff || 'height' in diff || 'padding' in diff || 'left' in diff ||
+	        'top' in diff || 'bottom' in diff || 'right' in diff) {
+	      this.regenerateMesh();
+	    }
+	  },
 
 	  /**
-	   * Called on each scene tick.
+	   * Update `src` if using built-in material.
 	   */
-	  // tick: function (t) { },
+	  updateMap: function () {
+	    var src = this.data.src;
 
-	  /**
-	   * Called when entity pauses.
-	   * Use to stop or remove any dynamic or background behavior such as events.
-	   */
-	  pause: function () { },
+	    if (src) {
+	      if (src === this.textureSrc) { return; }
+	      // Texture added or changed.
+	      this.textureSrc = src;
+	      this.el.sceneEl.systems.material.loadTexture(src, {src: src}, setMap.bind(this));
+	      return;
+	    }
 
-	  /**
-	   * Called when entity resumes.
-	   * Use to continue or add any dynamic or background behavior such as events.
-	   */
-	  play: function () { }
+	    // Texture removed.
+	    if (!this.material.map) { return; }
+	    setMap(null);
+
+	    function setMap (texture) {
+	      this.material.map = texture;
+	      this.material.needsUpdate = true;
+	      this.regenerateMesh();
+	    }
+	  },
+
 	});
 
 	function parseSide (side) {
@@ -259,5 +264,5 @@
 	}
 
 
-/***/ }
+/***/ })
 /******/ ]);
