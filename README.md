@@ -2,7 +2,7 @@
 
 A  [9-Slice](http://www.centigrade.de/blog/en/article/modern-user-interface-design-tools-part-2-graphical-approach-of-gui-design-tools/) component for [A-Frame](https://aframe.io).
 
- ![slice9](https://raw.githubusercontent.com/fernandojsg/aframe-slice9-component/master/images/screenshotbasic.png)
+ ![slice9](https://cloud.githubusercontent.com/assets/674727/24439830/8e493334-1405-11e7-9463-3da06712da91.png)
 
 ### API
 
