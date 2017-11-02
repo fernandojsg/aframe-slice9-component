@@ -58,6 +58,8 @@ AFRAME.registerComponent('slice9', {
     var uvs = this.geometry.attributes.uv.array;
     var width;
 
+    if (this.material && !this.material.map) { return; }
+
     /*
       0--1------------------------------2--3
       |  |                              |  |
