@@ -171,6 +171,11 @@ AFRAME.registerComponent('slice9', {
       if ('src' in diff) { this.updateMap(); }
     }
 
+    if ('width' in diff || 'height' in diff) {
+      this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
+      this.plane.geometry = this.geometry;
+    }
+
     if ('width' in diff || 'height' in diff || 'padding' in diff || 'left' in diff ||
         'top' in diff || 'bottom' in diff || 'right' in diff) {
       this.regenerateMesh();
