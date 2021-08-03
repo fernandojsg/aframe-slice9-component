@@ -9,6 +9,7 @@ if (typeof AFRAME === 'undefined') {
  */
 AFRAME.registerComponent('slice9', {
   schema: {
+    alphaTest: {default: 0.0},
     bottom: {default: 0, min: 0},
     color: {type: 'color', default: '#fff'},
     debug: {default: false},
@@ -42,8 +43,8 @@ AFRAME.registerComponent('slice9', {
       this.plane = new THREE.Mesh(geometry);
     } else {
       material = this.material = new THREE.MeshBasicMaterial({
-        color: data.color, opacity: data.opacity, transparent: data.transparent,
-        wireframe: data.debug
+        alphaTest: data.alphaTest, color: data.color, opacity: data.opacity,
+        transparent: data.transparent, wireframe: data.debug
       });
       this.plane = new THREE.Mesh(geometry, material);
     }
@@ -163,6 +164,7 @@ AFRAME.registerComponent('slice9', {
 
     // Update material if using built-in material.
     if (!data.usingCustomMaterial) {
+      this.material.alphaTest = data.alphaTest;
       this.material.color.setStyle(data.color);
       this.material.opacity = data.opacity;
       this.material.transparent = data.transparent;
