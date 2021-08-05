@@ -19,6 +19,7 @@ A  [9-Slice](http://www.centigrade.de/blog/en/article/modern-user-interface-desi
 | color       |             | #fff              |
 | opacity     |             | 1.0              |
 | transparent |             | true              |
+| alphaTest   |             | 0.0               |
 | debug       |             | false              |
 | map         |             | ''              |
 
